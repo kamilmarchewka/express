@@ -50,13 +50,16 @@ pipeline {
                 '''
             }
         }
+        
         stage('Smoke Test') {
             steps {
                 sh '''
                     sleep 5
-                    echo "--- TREŚĆ ODPOWIEDZI Z SERWERA: ---"
-                    curl -v http://localhost:3000 || echo "CURL PADŁ"
-                    echo "--- KONIEC ODPOWIEDZI ---"
+                    
+                    CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' hello-world-app)
+                    echo "Łączę się z IP: $CONTAINER_IP"
+                    
+                    curl -s -f http://$CONTAINER_IP:3000 | grep -i "Hello World"
                 '''
             }
         }

@@ -73,7 +73,7 @@ pipeline {
         stage('Publish') {
             steps {
                 sh 'ls'
-                sh 'mkdir -p artefact/logs
+                sh 'mkdir -p artefact/logs'
                 sh 'ls'
                 sh 'docker logs hello-world-app > artifact/logs/container.log 2>&1 || echo "Kontener nie istniał"'
                 archiveArtifacts artifacts: 'artefact/**', fingerprint: true

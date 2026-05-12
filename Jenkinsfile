@@ -59,7 +59,18 @@ pipeline {
                     CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' hello-world-app)
                     echo "Łączę się z IP: $CONTAINER_IP"
                     
-                    curl -s -f http://$CONTAINER_IP:3000 | grep -i "Hello World"
+                    if curl -s http://$CONTAINER_IP:3000 | grep -q "Hello World"; then
+                        echo "Sukces: Hello World się wyświetla"
+                        TEST_RESULT=0
+                    else
+                        echo "Błąd: Nie znaleziono frazy"
+                        TEST_RESULT=1
+                    fi
+                    
+                    docker stop hello-world-app
+                    docker rm hello-world-app
+                    
+                    exit $TEST_RESULT
                 '''
             }
         }

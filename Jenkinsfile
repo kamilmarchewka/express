@@ -25,11 +25,13 @@ pipeline {
 
         stage('Build Artefact .tar.gz') {
             steps {
-                sh'''
-                mkdir -p artefact/
-                ls
+                sh '''
+                    docker create --name extractor express-test-image
+                    docker cp extractor:/express-app.tar.gz ./express-app.tar.gz
+                    docker rm extractor
                 '''
-            }
+                archiveArtifacts 'express-app.tar.gz'
+          }
         }
     }
 

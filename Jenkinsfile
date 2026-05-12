@@ -72,7 +72,11 @@ pipeline {
 
         stage('Publish') {
             steps {
-                archiveArtifacts 'express-app.tar.gz'
+                sh 'ls'
+                sh 'mkdir -p artefact/logs
+                sh 'ls'
+                sh 'docker logs hello-world-app > artifact/logs/container.log 2>&1 || echo "Kontener nie istniał"'
+                archiveArtifacts artifacts: 'artefact/**', fingerprint: true
             }
         }
     }

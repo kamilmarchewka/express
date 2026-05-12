@@ -66,7 +66,7 @@ pipeline {
                         TEST_RESULT=1
                     fi
 
-                    sh 'docker logs hello-world-app > artefact/logs/container.log 2>&1 || echo "Kontener nie istniał"'
+                    docker logs hello-world-app > artefact/logs/container.log 2>&1 || echo "Kontener nie istniał"
                     
                     exit $TEST_RESULT
                 '''

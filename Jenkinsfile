@@ -30,9 +30,7 @@ pipeline {
                     docker cp extractor:/express-app.tar.gz ./express-app.tar.gz
                     docker rm extractor
                 '''
-                archiveArtifacts 'express-app.tar.gz'
-                sh 'ls'
-          }
+            }
         }
 
         stage('Deploy - run hello_world.js') {
@@ -69,6 +67,12 @@ pipeline {
                     
                     exit $TEST_RESULT
                 '''
+            }
+        }
+
+        stage('Publish') {
+            steps {
+                archiveArtifacts 'express-app.tar.gz'
             }
         }
     }

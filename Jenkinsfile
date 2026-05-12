@@ -53,11 +53,8 @@ pipeline {
         stage('Smoke Test') {
             steps {
                 echo 'Sprawdzanie czy aplikacja działa na localhost:3000'
-                sh '''
-                    sleep 5
-                    
-                    sh 'curl -s http://localhost:3000' 
-                '''
+                sh 'sleep 5'
+                sh 'curl -s -f http://localhost:3000 | grep "Hello World"'
             }
         }
     }

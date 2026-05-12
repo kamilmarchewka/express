@@ -23,11 +23,12 @@ pipeline {
             }
         }
 
-        stage('Build Artefact .tar.gz') {
+        stage('Build App Artefact .tar.gz') {
             steps {
                 sh '''
+                    sh 'mkdir -p artefact/ artefact/logs'
                     docker create --name extractor express-test-image
-                    docker cp extractor:/express-app.tar.gz ./express-app.tar.gz
+                    docker cp extractor:/express-app.tar.gz ./artefact/express-app.tar.gz
                     docker rm extractor
                 '''
             }
@@ -64,6 +65,8 @@ pipeline {
                         echo "Błąd: Nie znaleziono frazy"
                         TEST_RESULT=1
                     fi
+
+                    sh 'docker logs hello-world-app > artifact/logs/container.log 2>&1 || echo "Kontener nie istniał"'
                     
                     exit $TEST_RESULT
                 '''
@@ -71,11 +74,9 @@ pipeline {
         }
 
         stage('Publish') {
-            steps {
+            steps {                
                 sh 'ls'
-                sh 'mkdir -p artefact/logs'
-                sh 'ls'
-                sh 'docker logs hello-world-app > artifact/logs/container.log 2>&1 || echo "Kontener nie istniał"'
+                sh 'ls artefact/'
                 archiveArtifacts artifacts: 'artefact/**', fingerprint: true
             }
         }

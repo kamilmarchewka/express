@@ -31,6 +31,7 @@ pipeline {
                     docker rm extractor
                 '''
                 archiveArtifacts 'express-app.tar.gz'
+                sh 'ls'
           }
         }
     }

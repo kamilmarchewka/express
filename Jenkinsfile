@@ -67,9 +67,6 @@ pipeline {
                         TEST_RESULT=1
                     fi
                     
-                    docker stop hello-world-app
-                    docker rm hello-world-app
-                    
                     exit $TEST_RESULT
                 '''
             }
@@ -80,6 +77,8 @@ pipeline {
         always {
             echo 'Czyszczenie środowiska...'
             sh 'docker rmi express-test-image || true'
+            sh 'docker stop hello-world-app'
+            sh 'docker rm hello-world-app'
         }
         success {
             echo 'Pipeline zakończony sukcesem!'

@@ -56,7 +56,7 @@ pipeline {
                 sh '''
                     sleep 5
                     
-                    if curl -f http://localhost:3000 | grep -q "Hello World"; then
+                    if curl -s -f http://localhost:3000 | grep -q "Hello World"; then
                         echo "Sukces: Aplikacja odpowiada i wyświetla naspis 'Hello World'!"
                     else
                         echo "Błąd: Aplikacja nie działa poprawnie lub nie zawiera oczekiwanego tekstu."

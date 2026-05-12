@@ -27,8 +27,12 @@ pipeline {
             steps {
                 sh '''
                     mkdir -p artefact/ artefact/logs
+
+                    VERSION="1.0.${BUILD_NUMBER}"
+                    ARTEFACT_NAME="express-app-v${VERSION}.tar.gz"
+                    
                     docker create --name extractor express-test-image
-                    docker cp extractor:/express-app.tar.gz ./artefact/express-app.tar.gz
+                    docker cp extractor:/express-app.tar.gz ./artefact/${ARTEFACT_NAME}
                     docker rm extractor
                 '''
             }
@@ -85,9 +89,9 @@ pipeline {
     post {
         always {
             echo 'Czyszczenie środowiska...'
-            sh 'docker rmi express-test-image || true'
             sh 'docker stop hello-world-app'
             sh 'docker rm hello-world-app'
+            sh 'docker rmi express-test-image || true'
         }
         success {
             echo 'Pipeline zakończony sukcesem!'

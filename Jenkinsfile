@@ -34,6 +34,22 @@ pipeline {
                 sh 'ls'
           }
         }
+
+        stage('Deploy - run hello_world.js') {
+            steps {
+                echo 'Uruchomienie hello_world.js na localhost:3000'
+                sh'''
+                    docker stop hello-world-app || true
+                    docker rm hello-world-app || true
+
+                    docker run -d \
+                        -p 3000:3000 \
+                        --name hello-world-app \
+                        express-test-image \
+                        node examples/hello-world/index.js
+                '''
+            }
+        }
     }
 
     post {

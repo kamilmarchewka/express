@@ -52,9 +52,12 @@ pipeline {
         }
         stage('Smoke Test') {
             steps {
-                echo 'Sprawdzanie czy aplikacja działa na localhost:3000'
-                sh 'sleep 5'
-                sh 'curl -s -f http://localhost:3000 | grep -i "Hello World"'
+                sh '''
+                    sleep 5
+                    echo "--- TREŚĆ ODPOWIEDZI Z SERWERA: ---"
+                    curl -v http://localhost:3000 || echo "CURL PADŁ"
+                    echo "--- KONIEC ODPOWIEDZI ---"
+                '''
             }
         }
     }

@@ -50,6 +50,21 @@ pipeline {
                 '''
             }
         }
+        stage('Smoke Test') {
+            steps {
+                echo 'Sprawdzanie czy aplikacja działa na localhost:3000'
+                sh '''
+                    sleep 5
+                    
+                    if curl -f http://localhost:3000 | grep -q "Hello World"; then
+                        echo "Sukces: Aplikacja odpowiada i wyświetla naspis 'Hello World'!"
+                    else
+                        echo "Błąd: Aplikacja nie działa poprawnie lub nie zawiera oczekiwanego tekstu."
+                        exit 1
+                    fi
+                '''
+            }
+        }
     }
 
     post {

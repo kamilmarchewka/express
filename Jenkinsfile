@@ -22,6 +22,15 @@ pipeline {
                 sh 'docker run --rm express-test-image'
             }
         }
+
+        stage('Build Artefact .tar.gz') {
+            steps {
+                sh'''
+                mkdir -p artefact/
+                ls
+                '''
+            }
+        }
     }
 
     post {

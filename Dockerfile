@@ -11,4 +11,5 @@ RUN npm run test
 
 # Etap 3: Packager - przygotowanie paczki (artefaktu)
 FROM tester AS packager
+RUN ls -la
 RUN tar -czf /express-app.tar.gz index.js lib/ package.json node_modules/

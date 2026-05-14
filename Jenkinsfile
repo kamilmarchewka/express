@@ -14,7 +14,7 @@ pipeline {
             steps {
                 sh 'ls -la'
                 echo 'Budowanie obrazu dockerowego...'
-                sh 'docker build --no-cache -t express-test-image .'
+                sh 'docker build --target builder --no-cache -t express-test-image .'
             }
         }
 

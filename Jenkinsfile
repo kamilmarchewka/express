@@ -4,6 +4,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                cleanWs()
                 echo 'Pobieranie kodu...'
                 checkout scm
             }

@@ -37,7 +37,7 @@ pipeline {
                     
                     docker create --name extractor express-test-image-pkg
                     docker cp extractor:/express-app.tar.gz ./artefact/${ARTEFACT_NAME}
-                    docker rm extractor
+                    docker rm -f extractor
                 '''
             }
         }

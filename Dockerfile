@@ -7,6 +7,6 @@ COPY . .
 
 # Etap 2 - uruchomienie testów
 FROM builder AS tester
-CMD ["npm", "run", "test"]
+RUN npm run test
 
 RUN tar -czf /express-app.tar.gz index.js lib/ package.json node_modules/

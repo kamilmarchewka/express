@@ -12,6 +12,7 @@ pipeline {
 
         stage('Build Image') {
             steps {
+                sh 'ls -la'
                 echo 'Budowanie obrazu dockerowego...'
                 sh 'docker build --no-cache -t express-test-image .'
             }

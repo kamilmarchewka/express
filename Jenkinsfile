@@ -14,7 +14,7 @@ pipeline {
             steps {
                 sh 'ls -la'
                 echo 'Budowanie obrazu (warstwa builder)...'
-                sh 'docker build --no-cache --target builder -t express-test-image-builder .'
+                sh 'docker build --target builder -t express-test-image-builder .'
             }
         }
 
@@ -33,7 +33,7 @@ pipeline {
                     VERSION="1.0.${BUILD_NUMBER}"
                     ARTEFACT_NAME="express-app-v${VERSION}.tar.gz"
 
-                    docker build --no-cache --target packager -t express-test-image-pkg .
+                    docker build --target packager -t express-test-image-pkg .
                     
                     docker create --name extractor express-test-image-pkg
                     docker cp extractor:/express-app.tar.gz ./artefact/${ARTEFACT_NAME}

@@ -17,6 +17,8 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/index.js ./
 COPY --from=builder /app/lib/ ./lib/
 
+COPY --from=builder /app/examples/ ./examples/
+
 RUN npm install --only=production && npm cache clean --force
 
 # --- ETAP 4: Packager (Przygotowanie artefaktu) ---
@@ -27,4 +29,4 @@ RUN tar -czf /express-app.tar.gz -C /app .
 # Domyślny punkt startowy (używany przez etap Deploy w Jenkins)
 FROM runner
 EXPOSE 3000
-CMD ["node", "index.js"]
+CMD ["node", "examples/hello-world/index.js"]

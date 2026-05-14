@@ -14,14 +14,14 @@ pipeline {
             steps {
                 sh 'ls -la'
                 echo 'Budowanie obrazu (warstwa builder)...'
-                sh 'docker build --target builder -t express-test-image-builder .'
+                sh 'docker build --no-cache --target builder -t express-test-image-builder .'
             }
         }
 
         stage('Run Tests') {
             steps {
                 echo 'Uruchamianie testów w kontenerze (Target: tester)...'
-                sh 'docker build --target tester -t express-test-image-tester .'
+                sh 'docker build --no-cache --target tester -t express-test-image-tester .'
             }
         }
 
@@ -49,7 +49,7 @@ pipeline {
                     docker stop hello-world-app || true
                     docker rm hello-world-app || true
 
-                    docker build -t express-test-image .
+                    docker build --no-cache -t express-test-image .
 
                     docker run -d \
                         -p 3000:3000 \

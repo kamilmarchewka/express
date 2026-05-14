@@ -13,15 +13,15 @@ pipeline {
         stage('Build Image') {
             steps {
                 sh 'ls -la'
-                echo 'Budowanie obrazu dockerowego...'
-                sh 'docker build --target builder --no-cache -t express-test-image .'
+                echo 'Budowanie obrazu (warstwa builder)...'
+                sh 'docker build --no-cache --target builder -t express-test-image-builder .'
             }
         }
 
         stage('Run Tests') {
             steps {
-                echo 'Uruchamianie testów w kontenerze...'
-                sh 'docker run --rm express-test-image'
+                echo 'Uruchamianie testów w kontenerze (Target: tester)...'
+                sh 'docker build --target tester -t express-test-image-tester .'
             }
         }
 
@@ -32,8 +32,10 @@ pipeline {
 
                     VERSION="1.0.${BUILD_NUMBER}"
                     ARTEFACT_NAME="express-app-v${VERSION}.tar.gz"
+
+                    docker build --no-cache --target packager -t express-test-image-pkg .
                     
-                    docker create --name extractor express-test-image
+                    docker create --name extractor express-test-image-pkg
                     docker cp extractor:/express-app.tar.gz ./artefact/${ARTEFACT_NAME}
                     docker rm extractor
                 '''
@@ -46,6 +48,8 @@ pipeline {
                 sh'''
                     docker stop hello-world-app || true
                     docker rm hello-world-app || true
+
+                    docker build -t express-test-image .
 
                     docker run -d \
                         -p 3000:3000 \

@@ -25,22 +25,22 @@ pipeline {
             }
         }
 
-        stage('Build App Artefact .tar.gz') {
-            steps {
-                sh '''
-                    mkdir -p artefact/ artefact/logs
+        // stage('Build App Artefact .tar.gz') {
+        //     steps {
+        //         sh '''
+        //             mkdir -p artefact/ artefact/logs
 
-                    VERSION="1.0.${BUILD_NUMBER}"
-                    ARTEFACT_NAME="express-app-v${VERSION}.tar.gz"
+        //             VERSION="1.0.${BUILD_NUMBER}"
+        //             ARTEFACT_NAME="express-app-v${VERSION}.tar.gz"
 
-                    docker build --target packager -t express-test-image-pkg .
+        //             docker build --target packager -t express-test-image-pkg .
                     
-                    docker create --name extractor express-test-image-pkg
-                    docker cp extractor:/express-app.tar.gz ./artefact/${ARTEFACT_NAME}
-                    docker rm -f extractor
-                '''
-            }
-        }
+        //             docker create --name extractor express-test-image-pkg
+        //             docker cp extractor:/express-app.tar.gz ./artefact/${ARTEFACT_NAME}
+        //             docker rm -f extractor
+        //         '''
+        //     }
+        // }
 
         stage('Deploy - run hello_world.js') {
             steps {

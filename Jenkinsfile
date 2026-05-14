@@ -97,7 +97,7 @@ pipeline {
                 docker stop hello-world-app || true
                 docker rm -f hello-world-app extractor || true
                 # Usuwamy obrazy tymczasowe, by nie zapchać dysku
-                docker rmi express-app-test express-app-pkg || true
+                # docker rmi express-app-test express-app-pkg || true
             '''
         }
         success {

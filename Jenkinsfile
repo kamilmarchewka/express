@@ -1,61 +1,63 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "express-prod-app"
+        VERSION = "1.0.${BUILD_NUMBER}"
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Checkout & Cleanup') {
             steps {
                 cleanWs()
-                echo 'Pobieranie kodu...'
+                echo 'Pobieranie kodu i czyszczenie starych kontenerów...'
+                // Usuwamy ewentualne pozostałości, aby nazwy się nie dublowały
+                sh 'docker rm -f hello-world-app extractor || true'
                 checkout scm
             }
         }
 
-        stage('Build Image') {
+        stage('Build & Test') {
             steps {
-                sh 'ls -la'
-                echo 'Budowanie obrazu (warstwa builder)...'
-                sh 'docker build --no-cache --target builder -t express-test-image-builder .'
+                echo 'Budowanie i testowanie (Multi-stage: tester)...'
+                // Budujemy do etapu tester - jeśli testy padną, pipeline się zatrzyma
+                sh 'docker build --target tester -t express-app-test .'
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                echo 'Uruchamianie testów w kontenerze (Target: tester)...'
-                sh 'docker build --no-cache --target tester -t express-test-image-tester .'
-            }
-        }
-
-        stage('Build App Artefact .tar.gz') {
+        stage('Build App Artefact') {
             steps {
                 sh '''
-                    mkdir -p artefact/ artefact/logs
-
-                    VERSION="1.0.${BUILD_NUMBER}"
+                    mkdir -p artefact/logs
                     ARTEFACT_NAME="express-app-v${VERSION}.tar.gz"
 
-                    docker build --no-cache --target packager -t express-test-image-pkg .
+                    echo "Budowanie paczki (Target: packager)..."
+                    docker build --target packager -t express-app-pkg .
                     
-                    docker create --name extractor express-test-image-pkg
+                    # Wyciąganie pliku z kontenera
+                    docker rm -f extractor || true
+                    docker create --name extractor express-app-pkg
                     docker cp extractor:/express-app.tar.gz ./artefact/${ARTEFACT_NAME}
                     docker rm -f extractor
                 '''
             }
         }
 
-        stage('Deploy - run hello_world.js') {
+        stage('Deploy (Production Image)') {
             steps {
-                echo 'Uruchomienie hello_world.js na localhost:3000'
-                sh'''
+                echo 'Uruchamianie lekkiego obrazu produkcyjnego...'
+                sh '''
+                    # Budujemy finalny obraz (ostatni etap w Dockerfile)
+                    docker build -t ${IMAGE_NAME}:latest .
+
                     docker stop hello-world-app || true
                     docker rm hello-world-app || true
 
-                    docker build --no-cache -t express-test-image .
-
+                    # Uruchamiamy bez podawania ścieżki do pliku, bo Dockerfile ma CMD
                     docker run -d \
                         -p 3000:3000 \
                         --name hello-world-app \
-                        express-test-image \
-                        node examples/hello-world/index.js
+                        ${IMAGE_NAME}:latest
                 '''
             }
         }
@@ -64,20 +66,18 @@ pipeline {
             steps {
                 sh '''
                     sleep 5
-                    
                     CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' hello-world-app)
                     echo "Łączę się z IP: $CONTAINER_IP"
                     
                     if curl -s http://$CONTAINER_IP:3000 | grep -q "Hello World"; then
-                        echo "Sukces: Hello World się wyświetla"
+                        echo "Sukces: Aplikacja odpowiada poprawnie"
                         TEST_RESULT=0
                     else
-                        echo "Błąd: Nie znaleziono frazy"
+                        echo "Błąd: Brak odpowiedzi Hello World"
                         TEST_RESULT=1
                     fi
 
-                    docker logs hello-world-app > artefact/logs/container.log 2>&1 || echo "Kontener nie istniał"
-                    
+                    docker logs hello-world-app > artefact/logs/container.log 2>&1
                     exit $TEST_RESULT
                 '''
             }
@@ -85,8 +85,6 @@ pipeline {
 
         stage('Publish') {
             steps {                
-                sh 'ls'
-                sh 'ls artefact/'
                 archiveArtifacts artifacts: 'artefact/**', fingerprint: true
             }
         }
@@ -94,16 +92,19 @@ pipeline {
 
     post {
         always {
-            echo 'Czyszczenie środowiska...'
-            sh 'docker stop hello-world-app'
-            sh 'docker rm hello-world-app'
-            sh 'docker rmi express-test-image || true'
+            echo 'Sprzątanie po buildzie...'
+            sh '''
+                docker stop hello-world-app || true
+                docker rm -f hello-world-app extractor || true
+                # Usuwamy obrazy tymczasowe, by nie zapchać dysku
+                docker rmi express-app-test express-app-pkg || true
+            '''
         }
         success {
-            echo 'Pipeline zakończony sukcesem!'
+            echo "Pipeline zakończony sukcesem! Artefakt v${VERSION} gotowy."
         }
         failure {
-            echo 'Coś poszło nie tak. Sprawdź logi.'
+            echo 'Pipeline zakończony niepowodzeniem. Sprawdź logi etapów.'
         }
     }
 }

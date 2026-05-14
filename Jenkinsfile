@@ -13,7 +13,7 @@ pipeline {
         stage('Build Image') {
             steps {
                 echo 'Budowanie obrazu dockerowego...'
-                sh 'docker build -t express-test-image .'
+                sh 'docker build --no-cache -t express-test-image .'
             }
         }
 
@@ -32,7 +32,7 @@ pipeline {
                     VERSION="1.0.${BUILD_NUMBER}"
                     ARTEFACT_NAME="express-app-v${VERSION}.tar.gz"
                     
-                    docker create --name extractor express-test-image
+                    docker create --no-cache --name extractor express-test-image
                     docker cp extractor:/express-app.tar.gz ./artefact/${ARTEFACT_NAME}
                     docker rm extractor
                 '''

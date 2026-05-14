@@ -32,7 +32,7 @@ pipeline {
                     VERSION="1.0.${BUILD_NUMBER}"
                     ARTEFACT_NAME="express-app-v${VERSION}.tar.gz"
                     
-                    docker create --no-cache --name extractor express-test-image
+                    docker create --name extractor express-test-image
                     docker cp extractor:/express-app.tar.gz ./artefact/${ARTEFACT_NAME}
                     docker rm extractor
                 '''

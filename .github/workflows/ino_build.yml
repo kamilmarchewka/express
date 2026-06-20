@@ -1,0 +1,35 @@
+name: INO Build
+
+on:
+  push:
+    branches:
+      - ino_dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kodu
+        uses: actions/checkout@v4
+
+      - name: Ustaw Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalacja zależności
+        run: npm install
+
+      - name: Testy
+        run: npm run test
+
+      - name: Upload artefaktów
+        uses: actions/upload-artifact@v4
+        with:
+          name: express-build
+          path: |
+            lib/
+            index.js
+            package.json
+          retention-days: 7
